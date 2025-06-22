@@ -50,7 +50,9 @@ jobs:
         shell: bash
         run: |
           # Write the JSON env file
-          printf '%s\n' "${{ secrets.ENV_JSON }}" > .env.json
+          cat << 'EOF' > .env.json
+          ${{ secrets.ENV_JSON }}
+          EOF
 
           # Write the per-environment file
           if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
@@ -181,8 +183,10 @@ jobs:
         shell: bash
         run: |
           # Write the JSON env file
-          printf '%s\n' "${{ secrets.ENV_JSON }}" > .env.json
-
+          cat << 'EOF' > .env.json
+          ${{ secrets.ENV_JSON }}
+          EOF
+          
           # Write the per-environment file
           if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
             printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.stg
