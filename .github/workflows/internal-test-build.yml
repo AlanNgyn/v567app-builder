@@ -35,9 +35,9 @@ jobs:
           printf "Host %s\n  HostName %s\n  Port 2222\n  IdentityFile ~/.ssh/id_rsa\n" \
             "${{ secrets.PRIVATE_HOST }}" "${{ secrets.PRIVATE_HOST }}" > ~/.ssh/config
         
-      - name: Install global apollo
+      - name: Install Apollo CLI
         shell: bash
-        run: yarn global add apollo
+        run: npm install -g apollo
 
       # Checkout the actual application code
       - name: Checkout real code
@@ -159,10 +159,10 @@ jobs:
           ssh-keyscan -p 2222 ${{ secrets.PRIVATE_HOST }} >> ~/.ssh/known_hosts
           printf "Host %s\n  HostName %s\n  Port 2222\n  IdentityFile ~/.ssh/id_rsa\n" \
             "${{ secrets.PRIVATE_HOST }}" "${{ secrets.PRIVATE_HOST }}" > ~/.ssh/config
-            
-      - name: Install global apollo
+
+      - name: Install Apollo CLI
         shell: bash
-        run: yarn global add apollo
+        run: npm install -g apollo
 
       # Checkout the actual application code
       - name: Checkout real code
