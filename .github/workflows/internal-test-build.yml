@@ -43,12 +43,21 @@ jobs:
 
       - name: Setup environment file
         working-directory: real-code
+        shell: bash
         run: |
-          echo ${{ secrets.ENV_JSON }} > .env.json
+          # Write .env.json preserving newlines
+          cat << 'EOF' > .env.json
+          ${{ secrets.ENV_JSON }}
+          EOF
+          # Write environment-specific file
           if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
-            echo "${{ secrets.ENV_FILE }}" > .env.stg
+            cat << 'EOF' > .env.stg
+            ${{ secrets.ENV_FILE }}
+            EOF
           else
-            echo "${{ secrets.ENV_FILE }}" > .env.live
+            cat << 'EOF' > .env.live
+            ${{ secrets.ENV_FILE }}
+            EOF
           fi
 
       - name: Cache Yarn dependencies
@@ -160,12 +169,21 @@ jobs:
 
       - name: Setup environment file
         working-directory: real-code
+        shell: bash
         run: |
-          echo ${{ secrets.ENV_JSON }} > .env.json
+          # Write .env.json preserving newlines
+          cat << 'EOF' > .env.json
+          ${{ secrets.ENV_JSON }}
+          EOF
+          # Write environment-specific file
           if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
-            echo "${{ secrets.ENV_FILE }}" > .env.stg
+            cat << 'EOF' > .env.stg
+            ${{ secrets.ENV_FILE }}
+            EOF
           else
-            echo "${{ secrets.ENV_FILE }}" > .env.live
+            cat << 'EOF' > .env.live
+            ${{ secrets.ENV_FILE }}
+            EOF
           fi
       
       - name: Setup Android keystore
