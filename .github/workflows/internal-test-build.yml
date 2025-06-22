@@ -185,7 +185,7 @@ jobs:
       - name: Setup gradle properties
         working-directory: real-code/android
         run: |
-          echo ${{ secrets.GRADLE_PROPERTIES }} > gradle.properties
+          printf '%s\n' "${{ secrets.GRADLE_PROPERTIES }}" > gradle.properties
 
       - name: Cache Yarn dependencies
         uses: actions/cache@v4
