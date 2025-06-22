@@ -83,16 +83,16 @@ jobs:
         shell: bash
         run: |
           node -r ./src/scripts/load-env.js \
-            ./node_modules/cross-var/index.js apollo schema:download src/graphql/schema.json \
+            ./node_modules/cross-var/index.js npx apollo@2.33.9 schema:download src/graphql/schema.json \
               --endpoint="$STOREFRONT_API_URL" \
               --header="X-Shopify-Storefront-Access-Token: $STOREFRONT_ACCESS_TOKEN"
-          apollo client:codegen \
+          npx apollo@2.33.9 client:codegen \
             --target=typescript \
             --excludes=src/graphql/client/*.* \
             --localSchemaFile=src/graphql/schema.json \
             --tagName=gql \
             --outputFlat src/generated/server
-          apollo client:codegen \
+          npx apollo@2.33.9 client:codegen \
             --target=typescript \
             --includes=src/graphql/client/*.ts \
             --localSchemaFile=src/graphql/client/local-schema.graphql \
@@ -247,16 +247,16 @@ jobs:
         shell: bash
         run: |
           node -r ./src/scripts/load-env.js \
-            ./node_modules/cross-var/index.js apollo schema:download src/graphql/schema.json \
+            ./node_modules/cross-var/index.js npx apollo@2.33.9 schema:download src/graphql/schema.json \
               --endpoint="$STOREFRONT_API_URL" \
               --header="X-Shopify-Storefront-Access-Token: $STOREFRONT_ACCESS_TOKEN"
-          apollo client:codegen \
+          npx apollo@2.33.9 client:codegen \
             --target=typescript \
             --excludes=src/graphql/client/*.* \
             --localSchemaFile=src/graphql/schema.json \
             --tagName=gql \
             --outputFlat src/generated/server
-          apollo client:codegen \
+          npx apollo@2.33.9 client:codegen \
             --target=typescript \
             --includes=src/graphql/client/*.ts \
             --localSchemaFile=src/graphql/client/local-schema.graphql \
