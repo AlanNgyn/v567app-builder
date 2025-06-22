@@ -39,7 +39,7 @@ jobs:
         run: npm config set engine-strict false
 
       - name: Install Apollo CLI v2
-        run: npm install -g apollo@^2.33.9
+        run: npm install -g apollo@^2.33.0
 
       # Checkout the actual application code
       - name: Checkout real code
@@ -83,16 +83,16 @@ jobs:
         shell: bash
         run: |
           node -r ./src/scripts/load-env.js \
-            ./node_modules/cross-var/index.js npx apollo@2.33.9 schema:download src/graphql/schema.json \
+            ./node_modules/cross-var/index.js npx apollo@2.33.0 schema:download src/graphql/schema.json \
               --endpoint="$STOREFRONT_API_URL" \
               --header="X-Shopify-Storefront-Access-Token: $STOREFRONT_ACCESS_TOKEN"
-          npx apollo@2.33.9 client:codegen \
+          npx apollo@2.33.0 client:codegen \
             --target=typescript \
             --excludes=src/graphql/client/*.* \
             --localSchemaFile=src/graphql/schema.json \
             --tagName=gql \
             --outputFlat src/generated/server
-          npx apollo@2.33.9 client:codegen \
+          npx apollo@2.33.0 client:codegen \
             --target=typescript \
             --includes=src/graphql/client/*.ts \
             --localSchemaFile=src/graphql/client/local-schema.graphql \
@@ -190,7 +190,7 @@ jobs:
         run: npm config set engine-strict false
 
       - name: Install Apollo CLI v2
-        run: npm install -g apollo@^2.33.9
+        run: npm install -g apollo@^2.33.0
 
       # Checkout the actual application code
       - name: Checkout real code
@@ -247,16 +247,16 @@ jobs:
         shell: bash
         run: |
           node -r ./src/scripts/load-env.js \
-            ./node_modules/cross-var/index.js npx apollo@2.33.9 schema:download src/graphql/schema.json \
+            ./node_modules/cross-var/index.js npx apollo@2.33.0 schema:download src/graphql/schema.json \
               --endpoint="$STOREFRONT_API_URL" \
               --header="X-Shopify-Storefront-Access-Token: $STOREFRONT_ACCESS_TOKEN"
-          npx apollo@2.33.9 client:codegen \
+          npx apollo@2.33.0 client:codegen \
             --target=typescript \
             --excludes=src/graphql/client/*.* \
             --localSchemaFile=src/graphql/schema.json \
             --tagName=gql \
             --outputFlat src/generated/server
-          npx apollo@2.33.9 client:codegen \
+          npx apollo@2.33.0 client:codegen \
             --target=typescript \
             --includes=src/graphql/client/*.ts \
             --localSchemaFile=src/graphql/client/local-schema.graphql \
