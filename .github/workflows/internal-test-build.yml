@@ -70,6 +70,7 @@ jobs:
             yarn-
 
       - name: Install JS dependencies
+        working-directory: real-code
         shell: bash
         run: yarn --cwd real-code install --silent
 
@@ -211,6 +212,7 @@ jobs:
             yarn-
 
       - name: Install JS dependencies
+        working-directory: real-code
         shell: bash
         run: yarn --cwd real-code install --silent
 
