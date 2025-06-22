@@ -39,7 +39,7 @@ jobs:
         run: npm config set engine-strict false
 
       - name: Install Apollo CLI v2
-        run: npm install -g apollo@^2.33.0
+        run: npm install -g apollo@^2.33.9
 
       # Checkout the actual application code
       - name: Checkout real code
@@ -190,7 +190,7 @@ jobs:
         run: npm config set engine-strict false
 
       - name: Install Apollo CLI v2
-        run: npm install -g apollo@^2.33.0
+        run: npm install -g apollo@^2.33.9
 
       # Checkout the actual application code
       - name: Checkout real code
