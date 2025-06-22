@@ -73,6 +73,10 @@ jobs:
         shell: bash
         run: yarn --cwd real-code install --silent
 
+      - name: Generate graphql
+        shell: bash
+        run: yarn apollo:generate
+
       - name: Setup Ruby & Fastlane
         uses: ruby/setup-ruby@v1
         with:
@@ -208,6 +212,10 @@ jobs:
       - name: Install JS dependencies
         shell: bash
         run: yarn --cwd real-code install --silent
+
+      - name: Generate graphql
+        shell: bash
+        run: yarn apollo:generate
 
       - name: Setup Ruby & Fastlane
         uses: ruby/setup-ruby@v1
