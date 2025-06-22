@@ -45,19 +45,14 @@ jobs:
         working-directory: real-code
         shell: bash
         run: |
-          # Write .env.json preserving newlines
-          cat << 'EOF' > .env.json
-          ${{ secrets.ENV_JSON }}
-          EOF
-          # Write environment-specific file
+          # Write the JSON env file
+          printf '%s\n' "${{ secrets.ENV_JSON }}" > .env.json
+
+          # Write the per-environment file
           if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
-            cat << 'EOF' > .env.stg
-            ${{ secrets.ENV_FILE }}
-            EOF
+            printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.stg
           else
-            cat << 'EOF' > .env.live
-            ${{ secrets.ENV_FILE }}
-            EOF
+            printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.live
           fi
 
       - name: Cache Yarn dependencies
@@ -171,19 +166,14 @@ jobs:
         working-directory: real-code
         shell: bash
         run: |
-          # Write .env.json preserving newlines
-          cat << 'EOF' > .env.json
-          ${{ secrets.ENV_JSON }}
-          EOF
-          # Write environment-specific file
+          # Write the JSON env file
+          printf '%s\n' "${{ secrets.ENV_JSON }}" > .env.json
+
+          # Write the per-environment file
           if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
-            cat << 'EOF' > .env.stg
-            ${{ secrets.ENV_FILE }}
-            EOF
+            printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.stg
           else
-            cat << 'EOF' > .env.live
-            ${{ secrets.ENV_FILE }}
-            EOF
+            printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.live
           fi
       
       - name: Setup Android keystore
