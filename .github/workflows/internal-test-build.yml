@@ -81,7 +81,23 @@ jobs:
       - name: Generate graphql
         working-directory: real-code
         shell: bash
-        run: yarn apollo:generate
+        run: |
+          node -r ./src/scripts/load-env.js \
+            ./node_modules/cross-var/index.js apollo schema:download src/graphql/schema.json \
+              --endpoint="$STOREFRONT_API_URL" \
+              --header="X-Shopify-Storefront-Access-Token: $STOREFRONT_ACCESS_TOKEN"
+          apollo client:codegen \
+            --target=typescript \
+            --excludes=src/graphql/client/*.* \
+            --localSchemaFile=src/graphql/schema.json \
+            --tagName=gql \
+            --outputFlat src/generated/server
+          apollo client:codegen \
+            --target=typescript \
+            --includes=src/graphql/client/*.ts \
+            --localSchemaFile=src/graphql/client/local-schema.graphql \
+            --tagName=gql \
+            --outputFlat src/generated/client
 
       - name: Setup Ruby & Fastlane
         uses: ruby/setup-ruby@v1
@@ -175,7 +191,7 @@ jobs:
 
       - name: Install Apollo CLI v2
         run: npm install -g apollo@^2.33.0
-        
+
       # Checkout the actual application code
       - name: Checkout real code
         run: |
@@ -229,7 +245,23 @@ jobs:
       - name: Generate graphql
         working-directory: real-code
         shell: bash
-        run: yarn apollo:generate
+        run: |
+          node -r ./src/scripts/load-env.js \
+            ./node_modules/cross-var/index.js apollo schema:download src/graphql/schema.json \
+              --endpoint="$STOREFRONT_API_URL" \
+              --header="X-Shopify-Storefront-Access-Token: $STOREFRONT_ACCESS_TOKEN"
+          apollo client:codegen \
+            --target=typescript \
+            --excludes=src/graphql/client/*.* \
+            --localSchemaFile=src/graphql/schema.json \
+            --tagName=gql \
+            --outputFlat src/generated/server
+          apollo client:codegen \
+            --target=typescript \
+            --includes=src/graphql/client/*.ts \
+            --localSchemaFile=src/graphql/client/local-schema.graphql \
+            --tagName=gql \
+            --outputFlat src/generated/client
 
       - name: Setup Ruby & Fastlane
         uses: ruby/setup-ruby@v1
