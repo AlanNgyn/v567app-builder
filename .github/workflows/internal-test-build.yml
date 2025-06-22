@@ -167,7 +167,13 @@ jobs:
           else
             echo "${{ secrets.ENV_FILE }}" > .env.live
           fi
-
+      
+      - name: Setup Android keystore
+        working-directory: real-code/android
+        run: |
+          mkdir -p SSP-Android-Key
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > app/SSP-Android-Key/thelook.jks
+      
       - name: Setup gradle properties
         working-directory: real-code/android
         run: |
