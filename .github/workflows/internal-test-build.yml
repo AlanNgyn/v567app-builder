@@ -74,6 +74,7 @@ jobs:
         run: yarn --cwd real-code install --silent
 
       - name: Generate graphql
+        working-directory: real-code
         shell: bash
         run: yarn apollo:generate
 
@@ -214,6 +215,7 @@ jobs:
         run: yarn --cwd real-code install --silent
 
       - name: Generate graphql
+        working-directory: real-code
         shell: bash
         run: yarn apollo:generate
 
