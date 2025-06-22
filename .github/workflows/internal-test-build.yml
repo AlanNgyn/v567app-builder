@@ -177,10 +177,10 @@ jobs:
           fi
       
       - name: Setup Android keystore
-        working-directory: real-code/android
+        working-directory: real-code/android/app
         run: |
           mkdir -p SSP-Android-Key
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > app/SSP-Android-Key/thelook.jks
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > SSP-Android-Key/thelook.jks
       
       - name: Setup gradle properties
         working-directory: real-code/android
