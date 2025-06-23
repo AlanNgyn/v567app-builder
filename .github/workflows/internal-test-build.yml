@@ -45,17 +45,13 @@ jobs:
         working-directory: real-code
         shell: bash
         run: |
-          # Write the JSON env file
-          cat << 'EOF' > .env.json
-          ${{ secrets.ENV_JSON }}
-          EOF
-
           # Write the per-environment file
           if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
             printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.stg
           else
             printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.live
           fi
+          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
 
       - name: Cache Yarn dependencies
         uses: actions/cache@v4
@@ -130,7 +126,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gym-log
-          path: "/Users/runner/Library/Logs/gym/SSP-SPF.log"
+          path: "/Users/runner/Library/Logs/gym/SupersportsStaging-SupersportsStaging Release.log"
 
       - name: Notify on failure
         if: failure()
@@ -169,17 +165,13 @@ jobs:
         working-directory: real-code
         shell: bash
         run: |
-          # Write the JSON env file
-          cat << 'EOF' > .env.json
-          ${{ secrets.ENV_JSON }}
-          EOF
-          
           # Write the per-environment file
           if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
             printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.stg
           else
             printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.live
           fi
+          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
       
       - name: Setup Android keystore
         working-directory: real-code/android/app
