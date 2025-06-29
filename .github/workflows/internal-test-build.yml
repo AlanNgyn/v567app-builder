@@ -22,7 +22,7 @@ jobs:
         run: |
           curl -X POST \
             -H 'Content-Type: application/json' \
-            -d '{"project":"'"${{ vars.PROJECT_NAME }}"'","message":"**[BUILD STARTED]**\nStarting internal test build for branch `${{ github.event.inputs.branch }}`.\n Please wait... :bicyclist:","status":999,"link":""}' \
+            -d '{"project":"'"${{ vars.PROJECT_NAME }}"'","message":"**[BUILD STARTED]**\nStarting internal test build for branch **${{ github.event.inputs.branch }}**.\nPlease wait... :bicyclist:","status":999,"link":""}' \
             "${{ secrets.NOTIFICATION_WEBHOOK_URL }}"
   ios-adhoc:
     name: iOS AdHoc Build
