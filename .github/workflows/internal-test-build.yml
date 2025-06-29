@@ -256,12 +256,14 @@ jobs:
           EOF
           )
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          JSON_PAYLOAD=$(printf '{
+            "project": "${{ vars.PROJECT_NAME }}",
+            "message": "%s",
+            "status": 1,
+            "link": "%s"
+          }' "${ERROR_MSG//$'\n'/\\n}" "$RUN_URL")
+
           curl -X POST \
             -H 'Content-Type: application/json' \
-            -d '{
-              "project": "'"${{ vars.PROJECT_NAME }}"'",
-              "message": "'"${ERROR_MSG//$'\n'/\\n'}'",
-              "status": 1,
-              "link": "'"${RUN_URL}"'"
-            }' \
+            -d "$JSON_PAYLOAD" \
             "${{ secrets.NOTIFICATION_WEBHOOK_URL }}"
