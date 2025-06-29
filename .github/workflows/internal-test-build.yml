@@ -248,7 +248,7 @@ jobs:
         # if: failure()
         shell: bash
         run: |
-          ERROR_MSG='**:rotating_light: CI PANIC MODE: ENGAGED :rotating_light:**\\nJob `${{ github.job }}` tripped on branch **`${{ github.event.inputs.branch }}`** and faceplanted :monkey_face::boom:\\nSummoning @anhnh2_377 from the shadows!\\nClick the link before someone calls you :scream::point_down:'
+          ERROR_MSG='**:rotating_light: CI PANIC MODE: ENGAGED :rotating_light:**\nJob `${{ github.job }}` tripped on branch **`${{ github.event.inputs.branch }}`** and faceplanted :monkey_face::boom:\nSummoning @anhnh2_377 from the shadows!\nClick the link before someone calls you :scream::point_down:'
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           curl -X POST \
             -H 'Content-Type: application/json' \
