@@ -221,15 +221,15 @@ jobs:
           bundle config set path 'vendor/bundle'
           bundle install --jobs 4 --retry 3
 
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('real-code/android/build.gradle') }}
-          restore-keys: |
-            gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-
+      # - name: Cache Gradle dependencies
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       ~/.gradle/caches
+      #       ~/.gradle/wrapper
+      #     key: gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('real-code/android/build.gradle') }}
+      #     restore-keys: |
+      #       gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-
       
       - name: Remove gradle cache
         working-directory: real-code
