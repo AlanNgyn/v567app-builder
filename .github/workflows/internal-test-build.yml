@@ -186,16 +186,6 @@ jobs:
           ${{ secrets.GRADLE_PROPERTIES }}
           EOF
 
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            real-code/node_modules
-            ~/.cache/yarn
-          key: yarn-${{ hashFiles('real-code/yarn.lock') }}
-          restore-keys: |
-            yarn-
-
       - name: Install JS dependencies
         working-directory: real-code
         shell: bash
@@ -232,6 +222,7 @@ jobs:
       #       gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-
       
       - name: Remove gradle cache
+        shell: bash
         working-directory: real-code
         run: rm -rf android/.cxx android/.gradle android/build node_modules/react-native-mmkv/android/.cxx
 
