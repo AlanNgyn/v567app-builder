@@ -227,14 +227,13 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-            real-code/android/.gradle
           key: gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('real-code/android/build.gradle') }}
           restore-keys: |
             gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-
       
       - name: Remove gradle cache
-        working-directory: real-code/android
-        run: rm -rf .gradle
+        working-directory: real-code
+        run: rm -rf android/.gradle
 
       - name: Build APK via Fastlane
         working-directory: real-code/fastlane
