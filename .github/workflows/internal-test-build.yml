@@ -248,22 +248,9 @@ jobs:
         # if: failure()
         shell: bash
         run: |
-          ERROR_MSG=$(cat <<EOF
-          **:rotating_light: CI PANIC MODE: ENGAGED :rotating_light:**
-          Job \`${{ github.job }}\` tripped on branch **\`${{ github.event.inputs.branch }}\`** and faceplanted :monkey_face::boom:
-          Summoning @anhnh2_377 from the shadows!
-          Click the link before someone calls you :scream::point_down:
-          EOF
-          )
+          ERROR_MSG='**:rotating_light: CI PANIC MODE: ENGAGED :rotating_light:**\\nJob `${{ github.job }}` tripped on branch **`${{ github.event.inputs.branch }}`** and faceplanted :monkey_face::boom:\\nSummoning @anhnh2_377 from the shadows!\\nClick the link before someone calls you :scream::point_down:'
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          JSON_PAYLOAD=$(printf '{
-            "project": "${{ vars.PROJECT_NAME }}",
-            "message": "%s",
-            "status": 1,
-            "link": "%s"
-          }' "${ERROR_MSG//$'\n'/\\n}" "$RUN_URL")
-
           curl -X POST \
             -H 'Content-Type: application/json' \
-            -d "$JSON_PAYLOAD" \
+            -d '{"project":"'"${{ vars.PROJECT_NAME }}"'","message":"'"${ERROR_MSG}"'","status":1,"link":"'"${RUN_URL}"'"}' \
             "${{ secrets.NOTIFICATION_WEBHOOK_URL }}"
