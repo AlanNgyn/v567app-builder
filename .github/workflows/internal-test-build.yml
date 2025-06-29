@@ -13,6 +13,17 @@ on:
         default: "staging"
 
 jobs:
+  notify-start:
+    name: Notify Build Start
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send starting notification
+        shell: bash
+        run: |
+          curl -X POST \
+            -H 'Content-Type: application/json' \
+            -d '{"project":"'"${{ vars.PROJECT_NAME }}"'","message":"**[BUILD STARTED]**\\nStarting internal test build for branch '\''${{ github.event.inputs.branch }}'\''.\\n Please wait... :bicyclist:","status":0,"link":"'"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"'"}' \
+            "${{ secrets.NOTIFICATION_WEBHOOK_URL }}"
   ios-adhoc:
     name: iOS AdHoc Build
     environment: ${{ github.event.inputs.environment }}
