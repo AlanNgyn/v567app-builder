@@ -233,7 +233,7 @@ jobs:
       
       - name: Remove gradle cache
         working-directory: real-code
-        run: rm -rf android/.gradle
+        run: rm -rf android/.cxx android/.gradle android/build node_modules/react-native-mmkv/android/.cxx
 
       - name: Install ninja
         run: sudo apt-get update && sudo apt-get install -y ninja-build
