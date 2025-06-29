@@ -19,237 +19,237 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 30
     steps:
-      - name: Create fastlane keychain
-        run: |
-          security create-keychain -p "" ${{ vars.KEYCHAIN_NAME }}
-          security default-keychain -s ${{ vars.KEYCHAIN_NAME }}
+      # - name: Create fastlane keychain
+      #   run: |
+      #     security create-keychain -p "" ${{ vars.KEYCHAIN_NAME }}
+      #     security default-keychain -s ${{ vars.KEYCHAIN_NAME }}
 
-      - name: Setup SSH for private repo
-        run: |
-          mkdir -p ~/.ssh
-          cat << 'EOF' > ~/.ssh/id_rsa
-          ${{ secrets.SSH_PRIVATE_KEY }}
-          EOF
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 2222 ${{ secrets.PRIVATE_HOST }} >> ~/.ssh/known_hosts
-          printf "Host %s\n  HostName %s\n  Port 2222\n  IdentityFile ~/.ssh/id_rsa\n" \
-            "${{ secrets.PRIVATE_HOST }}" "${{ secrets.PRIVATE_HOST }}" > ~/.ssh/config
+      # - name: Setup SSH for private repo
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     cat << 'EOF' > ~/.ssh/id_rsa
+      #     ${{ secrets.SSH_PRIVATE_KEY }}
+      #     EOF
+      #     chmod 600 ~/.ssh/id_rsa
+      #     ssh-keyscan -p 2222 ${{ secrets.PRIVATE_HOST }} >> ~/.ssh/known_hosts
+      #     printf "Host %s\n  HostName %s\n  Port 2222\n  IdentityFile ~/.ssh/id_rsa\n" \
+      #       "${{ secrets.PRIVATE_HOST }}" "${{ secrets.PRIVATE_HOST }}" > ~/.ssh/config
 
-      # Checkout the actual application code
-      - name: Checkout real code
-        run: |
-          git clone --branch ${{ github.event.inputs.branch }} --single-branch \
-            ${{ secrets.PRIVATE_REPO_FULL_NAME }} real-code
+      # # Checkout the actual application code
+      # - name: Checkout real code
+      #   run: |
+      #     git clone --branch ${{ github.event.inputs.branch }} --single-branch \
+      #       ${{ secrets.PRIVATE_REPO_FULL_NAME }} real-code
 
-      - name: Setup environment file
-        working-directory: real-code
-        shell: bash
-        run: |
-          # Write the per-environment file
-          if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
-            printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.stg
-          else
-            printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.live
-          fi
-          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
+      # - name: Setup environment file
+      #   working-directory: real-code
+      #   shell: bash
+      #   run: |
+      #     # Write the per-environment file
+      #     if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
+      #       printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.stg
+      #     else
+      #       printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.live
+      #     fi
+      #     printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
 
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            real-code/node_modules
-            ~/.cache/yarn
-          key: yarn-${{ hashFiles('real-code/yarn.lock') }}
-          restore-keys: |
-            yarn-
+      # - name: Cache Yarn dependencies
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       real-code/node_modules
+      #       ~/.cache/yarn
+      #     key: yarn-${{ hashFiles('real-code/yarn.lock') }}
+      #     restore-keys: |
+      #       yarn-
 
-      - name: Install JS dependencies
-        working-directory: real-code
-        shell: bash
-        run: yarn --cwd real-code install --silent
+      # - name: Install JS dependencies
+      #   working-directory: real-code
+      #   shell: bash
+      #   run: yarn --cwd real-code install --silent
 
-      - name: Setup Ruby & Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.4.4"
+      # - name: Setup Ruby & Fastlane
+      #   uses: ruby/setup-ruby@v1
+      #   with:
+      #     ruby-version: "3.4.4"
 
-      - name: Cache Ruby gems
-        uses: actions/cache@v4
-        with:
-          path: real-code/fastlane/vendor/bundle
-          key: gem-cache-${{ hashFiles('real-code/fastlane/Gemfile.lock') }}
-          restore-keys: |
-            gem-cache-
-              
-      - name: Install Bundler
-        working-directory: real-code/fastlane
-        run: |
-          gem install bundler
-          bundle config set path 'vendor/bundle'
-          bundle install --jobs 4 --retry 3
+      # - name: Cache Ruby gems
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: real-code/fastlane/vendor/bundle
+      #     key: gem-cache-${{ hashFiles('real-code/fastlane/Gemfile.lock') }}
+      #     restore-keys: |
+      #       gem-cache-
 
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            real-code/ios/Pods
-            ~/.cocoapods/repos
-          key: ${{ runner.os }}-pods-${{ hashFiles('real-code/ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
+      # - name: Install Bundler
+      #   working-directory: real-code/fastlane
+      #   run: |
+      #     gem install bundler
+      #     bundle config set path 'vendor/bundle'
+      #     bundle install --jobs 4 --retry 3
 
-      - name: iOS Pod install
-        working-directory: real-code/ios
-        run: pod install --repo-update --silent
+      # - name: Cache CocoaPods
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       real-code/ios/Pods
+      #       ~/.cocoapods/repos
+      #     key: ${{ runner.os }}-pods-${{ hashFiles('real-code/ios/Podfile.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pods-
 
-      - name: Build & AdHoc via Fastlane
-        working-directory: real-code/fastlane
-        env:
-          KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
-          KEYCHAIN_PWD: ""
-          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
-          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          TEAM_ID: ${{ secrets.TEAM_ID }}
-          BUNDLE_ID_STAGING: ${{ secrets.BUNDLE_ID_STAGING }}
-          BUNDLE_ID_LIVE: ${{ secrets.BUNDLE_ID_LIVE }}
-          DIAWI_API_TOKEN: ${{ secrets.DIAWI_API_TOKEN }}
-          GG_DRIVE_FOLDER_ID: ${{ vars.GG_DRIVE_FOLDER_ID }}
-          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
-          BUILD_BRANCH: ${{ github.event.inputs.branch }}
-          DRIVER_KEY_JSON: ${{ secrets.DRIVER_KEY_JSON }}
-          FASTLANE_DISABLE_UPDATE_CHECK: true
-        run: bundle exec fastlane ios adhoc env:${{ github.event.inputs.environment }}
+      # - name: iOS Pod install
+      #   working-directory: real-code/ios
+      #   run: pod install --repo-update --silent
 
-      - name: Upload Gym log as artifact
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gym-log
-          path: "/Users/runner/Library/Logs/gym/SupersportsStaging-SupersportsStaging Release.log"
+      # - name: Build & AdHoc via Fastlane
+      #   working-directory: real-code/fastlane
+      #   env:
+      #     KEYCHAIN_NAME: ${{ vars.KEYCHAIN_NAME }}
+      #     KEYCHAIN_PWD: ""
+      #     FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+      #     MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+      #     MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      #     TEAM_ID: ${{ secrets.TEAM_ID }}
+      #     BUNDLE_ID_STAGING: ${{ secrets.BUNDLE_ID_STAGING }}
+      #     BUNDLE_ID_LIVE: ${{ secrets.BUNDLE_ID_LIVE }}
+      #     DIAWI_API_TOKEN: ${{ secrets.DIAWI_API_TOKEN }}
+      #     GG_DRIVE_FOLDER_ID: ${{ vars.GG_DRIVE_FOLDER_ID }}
+      #     PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+      #     BUILD_BRANCH: ${{ github.event.inputs.branch }}
+      #     DRIVER_KEY_JSON: ${{ secrets.DRIVER_KEY_JSON }}
+      #     FASTLANE_DISABLE_UPDATE_CHECK: true
+      #   run: bundle exec fastlane ios adhoc env:${{ github.event.inputs.environment }}
 
-      - name: Notify on failure
-        # if: failure()
-        shell: bash
-        run: |
-          ERROR_MSG='**:rotating_light: CI PANIC MODE: ENGAGED :rotating_light:**\nJob `${{ github.job }}` tripped on branch **`${{ github.event.inputs.branch }}`** and faceplanted :monkey_face::boom:\nSummoning @anhnh2_377 from the shadows!\nClick the link before someone calls you :scream::point_down:'
-          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          curl -X POST \
-            -H 'Content-Type: application/json' \
-            -d '{"project":"'"${{ vars.PROJECT_NAME }}"'","message":"'"${ERROR_MSG}"'","status":999,"link":"'"${RUN_URL}"'"}' \
-            "${{ secrets.NOTIFICATION_WEBHOOK_URL }}"            
-  build-apk:
-    name: Android build APK
-    runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
-    steps:
-      - name: Setup SSH for private repo
-        run: |
-          mkdir -p ~/.ssh
-          cat << 'EOF' > ~/.ssh/id_rsa
-          ${{ secrets.SSH_PRIVATE_KEY }}
-          EOF
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 2222 ${{ secrets.PRIVATE_HOST }} >> ~/.ssh/known_hosts
-          printf "Host %s\n  HostName %s\n  Port 2222\n  IdentityFile ~/.ssh/id_rsa\n" \
-            "${{ secrets.PRIVATE_HOST }}" "${{ secrets.PRIVATE_HOST }}" > ~/.ssh/config
-
-      # Checkout the actual application code
-      - name: Checkout real code
-        run: |
-          git clone --branch ${{ github.event.inputs.branch }} --single-branch \
-            ${{ secrets.PRIVATE_REPO_FULL_NAME }} real-code
-
-      - name: Setup environment file
-        working-directory: real-code
-        shell: bash
-        run: |
-          # Write the per-environment file
-          if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
-            printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.stg
-          else
-            printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.live
-          fi
-          printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
-      
-      - name: Setup Android keystore
-        working-directory: real-code/android/app
-        run: |
-          mkdir -p SSP-Android-Key
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > SSP-Android-Key/thelook.jks
-      
-      - name: Setup gradle properties
-        working-directory: real-code/android
-        run: |
-          cat << 'EOF' > gradle.properties
-          ${{ secrets.GRADLE_PROPERTIES }}
-          EOF
-
-      - name: Install JS dependencies
-        working-directory: real-code
-        shell: bash
-        run: yarn --cwd real-code install --silent
-
-      - name: Setup Ruby & Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.4.4"
-
-      - name: Cache Ruby gems
-        uses: actions/cache@v4
-        with:
-          path: real-code/fastlane/vendor/bundle
-          key: gem-cache-${{ hashFiles('real-code/fastlane/Gemfile.lock') }}
-          restore-keys: |
-            gem-cache-
-
-      - name: Install Bundler
-        working-directory: real-code/fastlane
-        run: |
-          gem install bundler
-          bundle config set path 'vendor/bundle'
-          bundle install --jobs 4 --retry 3
-
-      - name: Cache Gradle dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            real-code/android/.gradle
-          key: gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('real-code/android/build.gradle') }}
-          restore-keys: |
-            gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-
-      
-      - name: Remove gradle cache
-        shell: bash
-        working-directory: real-code
-        run: rm -rf android/.cxx android/.gradle android/build node_modules/react-native-mmkv/android/.cxx
-
-      - name: Build APK via Fastlane
-        working-directory: real-code/fastlane
-        env:
-          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
-          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          TEAM_ID: ${{ secrets.TEAM_ID }}
-          BUNDLE_ID_STAGING: ${{ secrets.BUNDLE_ID_STAGING }}
-          BUNDLE_ID_LIVE: ${{ secrets.BUNDLE_ID_LIVE }}
-          DIAWI_API_TOKEN: ${{ secrets.DIAWI_API_TOKEN }}
-          GG_DRIVE_FOLDER_ID: ${{ vars.GG_DRIVE_FOLDER_ID }}
-          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
-          BUILD_BRANCH: ${{ github.event.inputs.branch }}
-          DRIVER_KEY_JSON: ${{ secrets.DRIVER_KEY_JSON }}
-          FASTLANE_DISABLE_UPDATE_CHECK: true
-        run: bundle exec fastlane android apk env:${{ github.event.inputs.environment }}
+      # - name: Upload Gym log as artifact
+      #   if: failure()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: gym-log
+      #     path: "/Users/runner/Library/Logs/gym/SupersportsStaging-SupersportsStaging Release.log"
 
       - name: Notify on failure
         # if: failure()
-        shell: bash
-        run: |
-          ERROR_MSG='**:rotating_light: CI PANIC MODE: ENGAGED :rotating_light:**\nJob `${{ github.job }}` tripped on branch **`${{ github.event.inputs.branch }}`** and faceplanted :monkey_face::boom:\nSummoning @anhnh2_377 from the shadows!\nClick the link before someone calls you :scream::point_down:'
-          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          curl -X POST \
-            -H 'Content-Type: application/json' \
-            -d '{"project":"'"${{ vars.PROJECT_NAME }}"'","message":"'"${ERROR_MSG}"'","status":999,"link":"'"${RUN_URL}"'"}' \
-            "${{ secrets.NOTIFICATION_WEBHOOK_URL }}"
+        uses: ./.github/actions/notify-on-failure
+        with:
+          project_name: ${{ vars.PROJECT_NAME }}
+          webhook_url: ${{ secrets.NOTIFICATION_WEBHOOK_URL }}
+          job_name: ${{ github.job }}
+          branch: ${{ github.event.inputs.branch }}
+          run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  # build-apk:
+  #   name: Android build APK
+  #   runs-on: ubuntu-latest
+  #   environment: ${{ github.event.inputs.environment }}
+  #   steps:
+  #     - name: Setup SSH for private repo
+  #       run: |
+  #         mkdir -p ~/.ssh
+  #         cat << 'EOF' > ~/.ssh/id_rsa
+  #         ${{ secrets.SSH_PRIVATE_KEY }}
+  #         EOF
+  #         chmod 600 ~/.ssh/id_rsa
+  #         ssh-keyscan -p 2222 ${{ secrets.PRIVATE_HOST }} >> ~/.ssh/known_hosts
+  #         printf "Host %s\n  HostName %s\n  Port 2222\n  IdentityFile ~/.ssh/id_rsa\n" \
+  #           "${{ secrets.PRIVATE_HOST }}" "${{ secrets.PRIVATE_HOST }}" > ~/.ssh/config
+
+  #     # Checkout the actual application code
+  #     - name: Checkout real code
+  #       run: |
+  #         git clone --branch ${{ github.event.inputs.branch }} --single-branch \
+  #           ${{ secrets.PRIVATE_REPO_FULL_NAME }} real-code
+
+  #     - name: Setup environment file
+  #       working-directory: real-code
+  #       shell: bash
+  #       run: |
+  #         # Write the per-environment file
+  #         if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
+  #           printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.stg
+  #         else
+  #           printf '%s\n' "${{ secrets.ENV_FILE }}" > .env.live
+  #         fi
+  #         printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
+
+  #     - name: Setup Android keystore
+  #       working-directory: real-code/android/app
+  #       run: |
+  #         mkdir -p SSP-Android-Key
+  #         echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > SSP-Android-Key/thelook.jks
+
+  #     - name: Setup gradle properties
+  #       working-directory: real-code/android
+  #       run: |
+  #         cat << 'EOF' > gradle.properties
+  #         ${{ secrets.GRADLE_PROPERTIES }}
+  #         EOF
+
+  #     - name: Install JS dependencies
+  #       working-directory: real-code
+  #       shell: bash
+  #       run: yarn --cwd real-code install --silent
+
+  #     - name: Setup Ruby & Fastlane
+  #       uses: ruby/setup-ruby@v1
+  #       with:
+  #         ruby-version: "3.4.4"
+
+  #     - name: Cache Ruby gems
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: real-code/fastlane/vendor/bundle
+  #         key: gem-cache-${{ hashFiles('real-code/fastlane/Gemfile.lock') }}
+  #         restore-keys: |
+  #           gem-cache-
+
+  #     - name: Install Bundler
+  #       working-directory: real-code/fastlane
+  #       run: |
+  #         gem install bundler
+  #         bundle config set path 'vendor/bundle'
+  #         bundle install --jobs 4 --retry 3
+
+  #     - name: Cache Gradle dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: |
+  #           ~/.gradle/caches
+  #           ~/.gradle/wrapper
+  #           real-code/android/.gradle
+  #         key: gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('real-code/android/build.gradle') }}
+  #         restore-keys: |
+  #           gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-
+
+  #     - name: Remove gradle cache
+  #       shell: bash
+  #       working-directory: real-code
+  #       run: rm -rf android/.cxx android/.gradle android/build node_modules/react-native-mmkv/android/.cxx
+
+  #     - name: Build APK via Fastlane
+  #       working-directory: real-code/fastlane
+  #       env:
+  #         FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+  #         MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+  #         MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+  #         TEAM_ID: ${{ secrets.TEAM_ID }}
+  #         BUNDLE_ID_STAGING: ${{ secrets.BUNDLE_ID_STAGING }}
+  #         BUNDLE_ID_LIVE: ${{ secrets.BUNDLE_ID_LIVE }}
+  #         DIAWI_API_TOKEN: ${{ secrets.DIAWI_API_TOKEN }}
+  #         GG_DRIVE_FOLDER_ID: ${{ vars.GG_DRIVE_FOLDER_ID }}
+  #         PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+  #         BUILD_BRANCH: ${{ github.event.inputs.branch }}
+  #         DRIVER_KEY_JSON: ${{ secrets.DRIVER_KEY_JSON }}
+  #         FASTLANE_DISABLE_UPDATE_CHECK: true
+  #       run: bundle exec fastlane android apk env:${{ github.event.inputs.environment }}
+
+  #     - name: Notify on failure
+  #       if: failure()
+  #       shell: bash
+  #       run: |
+  #         ERROR_MSG='**:rotating_light: CI PANIC MODE: ENGAGED :rotating_light:**\nJob `${{ github.job }}` tripped on branch **`${{ github.event.inputs.branch }}`** and faceplanted :monkey_face::boom:\nSummoning @anhnh2_377 from the shadows!\nClick the link before someone calls you :scream::point_down:'
+  #         RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+  #         curl -X POST \
+  #           -H 'Content-Type: application/json' \
+  #           -d '{"project":"'"${{ vars.PROJECT_NAME }}"'","message":"'"${ERROR_MSG}"'","status":999,"link":"'"${RUN_URL}"'"}' \
+  #           "${{ secrets.NOTIFICATION_WEBHOOK_URL }}"
