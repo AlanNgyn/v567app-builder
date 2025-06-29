@@ -6,13 +6,11 @@ runs:
   steps:
     - name: Setup Ruby & Fastlane
       uses: ruby/setup-ruby@v1
-      shell: bash
       with:
         ruby-version: "3.4.4"
 
     - name: Cache Ruby gems
       uses: actions/cache@v4
-      shell: bash
       with:
         path: real-code/fastlane/vendor/bundle
         key: gem-cache-${{ hashFiles('real-code/fastlane/Gemfile.lock') }}
