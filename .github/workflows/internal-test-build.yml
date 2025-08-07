@@ -123,7 +123,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gym-log
-          path: ${{ github.event.inputs.environment == 'staging' && '/Users/runner/Library/Logs/gym/SupersportsStaging-Supersports33MegaSale Release.log' || '/Users/runner/Library/Logs/gym/Supersports-Supersports33MegaSale Release.log' }}
+          path: ${{ github.event.inputs.environment == 'staging' && '/Users/runner/Library/Logs/gym/SupersportsStaging-Supersports33MegaSale Release.log' || '/Users/runner/Library/Logs/gym/Supersports-Supersports33MegaSale Relase env live.log' }}
 
       - name: Notify on failure
         uses: ./.github/actions/notify-on-failure
