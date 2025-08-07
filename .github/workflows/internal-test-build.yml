@@ -84,6 +84,7 @@ jobs:
 
       - name: Prepare mobile build
         uses: ./.github/actions/prepare-mobile-build
+        
       - name: Cache CocoaPods
         uses: actions/cache@v4
         with:
@@ -122,7 +123,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gym-log
-          path: "/Users/runner/Library/Logs/gym/SupersportsStaging-SupersportsStaging Release.log"
+          path: ${{ github.event.inputs.environment == 'staging' && '/Users/runner/Library/Logs/gym/SupersportsStaging-Supersports33MegaSale Release.log' || '/Users/runner/Library/Logs/gym/Supersports-Supersports33MegaSale Release.log' }}
 
       - name: Notify on failure
         uses: ./.github/actions/notify-on-failure
