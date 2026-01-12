@@ -72,15 +72,15 @@ jobs:
           fi
           printf '%s\n' "${{ secrets.ENV_FILE }}" > .env
 
-      - name: Cache Yarn dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            real-code/node_modules
-            ~/.cache/yarn
-          key: yarn-${{ hashFiles('real-code/yarn.lock') }}
-          restore-keys: |
-            yarn-
+      # - name: Cache Yarn dependencies
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       real-code/node_modules
+      #       ~/.cache/yarn
+      #     key: yarn-${{ hashFiles('real-code/yarn.lock') }}
+      #     restore-keys: |
+      #       yarn-
 
       - name: Install JS dependencies
         working-directory: real-code
