@@ -123,7 +123,7 @@ jobs:
           BUILD_BRANCH: ${{ github.event.inputs.branch }}
           DRIVER_KEY_JSON: ${{ secrets.DRIVER_KEY_JSON }}
           FASTLANE_DISABLE_UPDATE_CHECK: true
-        run: bundle exec fastlane ios testflight_upload env:${{ github.event.inputs.environment }}
+        run: bundle exec fastlane ios testflight_upload env:${{ github.event.inputs.environment }} type:appstore
 
       - name: Upload Gym log as artifact
         if: failure()
