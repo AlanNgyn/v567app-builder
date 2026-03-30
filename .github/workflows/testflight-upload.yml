@@ -11,6 +11,10 @@ on:
         description: "Select environment (staging or live)"
         required: true
         default: "staging"
+      xcode_version:
+        description: "Xcode version (16.4 or 26.3)"
+        required: true
+        default: "16.4"
 
 jobs:
   notify-start:
@@ -28,13 +32,13 @@ jobs:
   ios-testflight:
     name: iOS TestFlight Upload
     environment: ${{ github.event.inputs.environment }}
-    runs-on: macos-15
+    runs-on: ${{ github.event.inputs.xcode_version == '26.3' && 'macos-26' || 'macos-15' }}
     timeout-minutes: 30
     steps:
       - name: Set Xcode version
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.4'
+          xcode-version: ${{ github.event.inputs.xcode_version }}
 
       - name: Checkout current repo
         uses: actions/checkout@v4
