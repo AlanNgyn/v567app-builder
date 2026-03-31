@@ -19,7 +19,7 @@ runs:
       shell: bash
       working-directory: real-code
       run: |
-        cat << 'EOF' > passbolt-key.asc
+        cat << 'EOF' > passbolt-bot-key.asc
         ${{ inputs.passbolt_private_key }}
         EOF
         cat << 'EOF' > .env.passbolt
@@ -30,14 +30,15 @@ runs:
       shell: bash
       working-directory: real-code
       run: |
+        source .env.passbolt
         if [[ "${{ inputs.environment }}" == "staging" ]]; then
-          yarn env:stg
+          npx tsx script/passbolt-env.ts staging
         else
-          yarn env:prod
+          npx tsx script/passbolt-env.ts production
         fi
 
     - name: Cleanup Passbolt credentials
       shell: bash
       if: always()
       working-directory: real-code
-      run: rm -f passbolt-key.asc .env.passbolt
+      run: rm -f passbolt-bot-key.asc .env.passbolt
