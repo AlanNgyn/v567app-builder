@@ -94,15 +94,15 @@ jobs:
       - name: Prepare mobile build
         uses: ./.github/actions/prepare-mobile-build
         
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            real-code/ios/Pods
-            ~/.cocoapods/repos
-          key: ${{ runner.os }}-pods-${{ hashFiles('real-code/ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
+      # - name: Cache CocoaPods
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       real-code/ios/Pods
+      #       ~/.cocoapods/repos
+      #     key: ${{ runner.os }}-pods-${{ hashFiles('real-code/ios/Podfile.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-pods-
 
       - name: iOS Pod install
         working-directory: real-code/ios
