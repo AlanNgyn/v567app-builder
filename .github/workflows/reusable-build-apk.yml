@@ -34,15 +34,7 @@ jobs:
       - name: Setup Android keystore
         working-directory: real-code/android/app
         run: |
-          mkdir -p SSP-Android-Key
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > SSP-Android-Key/thelook.jks
-
-      - name: Setup gradle properties
-        working-directory: real-code/android
-        run: |
-          cat << 'EOF' > gradle.properties
-          ${{ secrets.GRADLE_PROPERTIES }}
-          EOF
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > thelook.jks
 
       - name: Install JS dependencies
         working-directory: real-code
@@ -73,7 +65,7 @@ jobs:
       - name: Remove gradle cache
         shell: bash
         working-directory: real-code
-        run: rm -rf android/.cxx android/.gradle android/build node_modules/react-native-mmkv/android/.cxx
+        run: rm -rf android/.cxx android/.gradle android/build node_mofdules/react-native-mmkv/android/.cxx
 
       - name: Build APK via Fastlane
         working-directory: real-code/fastlane
@@ -89,6 +81,10 @@ jobs:
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           BUILD_BRANCH: ${{ inputs.branch }}
           DRIVER_KEY_JSON: ${{ secrets.DRIVER_KEY_JSON }}
+          MYAPP_UPLOAD_STORE_FILE: ${{ github.workspace }}/real-code/android/app/thelook.jks
+          MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }}
+          MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }}
+          MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
           FASTLANE_DISABLE_UPDATE_CHECK: true
         run: bundle exec fastlane android apk env:${{ inputs.environment }}
 
