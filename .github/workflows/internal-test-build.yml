@@ -20,7 +20,7 @@ jobs:
   notify-start:
     uses: ./.github/workflows/reusable-notify-start.yml
     with:
-      message: "**[BUILD STARTED]**\\nStarting internal test build for branch **${{ github.event.inputs.branch }}**.\\nPlease wait... :bicyclist:"
+      message: "**[BUILD STARTED]**\\nStarting internal test build for branch **${{ github.event.inputs.branch }}**.\\nPlease wait... :bicyclist: :man-biking: :woman-biking: :wind_blowing_face:"
     secrets: inherit
 
   ios-adhoc:
