@@ -1,0 +1,99 @@
+name: Reusable - Android Build AAB
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+      environment:
+        required: true
+        type: string
+
+jobs:
+  build-aab:
+    name: Android build AAB
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout current repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH for private repo
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          private_host: ${{ secrets.PRIVATE_HOST }}
+
+      - name: Checkout real code
+        uses: ./.github/actions/checkout-private-repo
+        with:
+          branch: ${{ inputs.branch }}
+          private_repo_full_name: ${{ secrets.PRIVATE_REPO_FULL_NAME }}
+
+      - name: Setup Android keystore
+        working-directory: real-code/android/app
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > thelook.jks
+
+      - name: Install JS dependencies
+        working-directory: real-code
+        shell: bash
+        run: yarn --cwd real-code install --silent
+
+      - name: Setup environment file
+        uses: ./.github/actions/setup-env
+        with:
+          environment: ${{ inputs.environment }}
+          passbolt_env_file: ${{ secrets.PASSBOLT_ENV_FILE }}
+          passbolt_private_key: ${{ secrets.PASSBOLT_PRIVATE_KEY }}
+
+      - name: Prepare mobile build
+        uses: ./.github/actions/prepare-mobile-build
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            real-code/android/.gradle
+          key: gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('real-code/android/build.gradle') }}
+          restore-keys: |
+            gradle-${{ hashFiles('real-code/android/gradle/wrapper/gradle-wrapper.properties') }}-
+
+      - name: Remove gradle cache
+        shell: bash
+        working-directory: real-code
+        run: rm -rf android/.cxx android/.gradle android/build node_mofdules/react-native-mmkv/android/.cxx
+
+      - name: Build AAB via Fastlane
+        working-directory: real-code/fastlane
+        env:
+          FASTLANE_USER: ${{ secrets.FASTLANE_USER }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+          BUNDLE_ID_STAGING: ${{ secrets.BUNDLE_ID_STAGING }}
+          BUNDLE_ID_LIVE: ${{ secrets.BUNDLE_ID_LIVE }}
+          DIAWI_API_TOKEN: ${{ secrets.DIAWI_API_TOKEN }}
+          GG_DRIVE_FOLDER_ID: ${{ vars.GG_DRIVE_FOLDER_ID }}
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+          BUILD_BRANCH: ${{ inputs.branch }}
+          DRIVER_KEY_JSON: ${{ secrets.DRIVER_KEY_JSON }}
+          MYAPP_UPLOAD_STORE_FILE: ${{ github.workspace }}/real-code/android/app/thelook.jks
+          MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }}
+          MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }}
+          MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
+          FASTLANE_DISABLE_UPDATE_CHECK: true
+        run: bundle exec fastlane android aab env:${{ inputs.environment }}
+
+      - name: Notify on failure
+        uses: ./.github/actions/notify-on-failure
+        if: failure()
+        with:
+          project_name: ${{ vars.PROJECT_NAME }}
+          webhook_url: ${{ secrets.NOTIFICATION_WEBHOOK_URL }}
+          job_name: ${{ github.job }}
+          branch: ${{ inputs.branch }}
+          run_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
