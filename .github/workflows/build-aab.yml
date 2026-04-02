@@ -8,9 +8,9 @@ on:
         required: true
         default: "develop"
       environment:
-        description: "Select environment (staging or live)"
+        description: "Select environment (staging or production)"
         required: true
-        default: "staging"
+        default: "production"
 
 jobs:
   notify-start:
